@@ -10,6 +10,14 @@ In your Gemfile:
 
     gem 'markdownizer'
 
+If you want code highlighting, you should run this generator too:
+
+    rails generate markdownizer:install
+
+This will place a markdownizer.css file in your `public/stylesheets` folder.
+You will have to require it manually in your layouts, or through `jammit`, or
+whatever.
+
 ## Usage
 
 In your model, let's say, Post:
