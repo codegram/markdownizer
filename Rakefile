@@ -26,14 +26,28 @@ CLEAN.include 'docs/index.html'
 task :doc => :docs
 
 # GITHUB PAGES ===============================================================
-
+#
 desc 'Update gh-pages branch'
-task :pages do
-  file '.git/refs/heads/gh-pages' => 'docs/' do |f|
-      `cd docs && git branch gh-pages --track origin/gh-pages`
-      `git add . && git commit 'updated gh-pages'`
+task :pages => ['docs/.git', :docs] do
+  rev = `git rev-parse --short HEAD`.strip
+  Dir.chdir 'docs' do
+    sh "git add *.html"
+    sh "git commit -m 'rebuild pages from #{rev}'" do |ok,res|
+      if ok
+        verbose { puts "gh-pages updated" }
+        sh "git push -q o HEAD:gh-pages"
+      end
+    end
   end
 end
+
+# desc 'Update gh-pages branch'
+# task :pages do
+#   file '.git/refs/heads/gh-pages' => 'docs/' do |f|
+#       `cd docs && git branch gh-pages --track origin/gh-pages`
+#       `git add . && git commit 'updated gh-pages'`
+#   end
+# end
 
 # TESTS =====================================================================
 
