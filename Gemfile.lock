@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     markdownizer (0.1.2)
-      activerecord (~> 3.0.3)
+      activerecord (>= 3.0.3)
       coderay
       rdiscount
 
@@ -45,7 +45,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord (~> 3.0.3)
+  activerecord (>= 3.0.3)
   coderay
   git
   markdownizer!

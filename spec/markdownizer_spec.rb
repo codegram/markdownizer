@@ -16,11 +16,11 @@ describe Markdownizer do
     let(:text) { """
       #My markdown text
 
-      {% highlight ruby %}
+      {% code ruby %}
         def function(*args)
           puts 'result'
         end
-      {% endhighlight %}
+      {% endcode %}
 
     """
     }
