@@ -31,6 +31,7 @@ desc 'Update gh-pages branch'
 task :pages do
   file '.git/refs/heads/gh-pages' => 'docs/' do |f|
       `cd docs && git branch gh-pages --track origin/gh-pages`
+      `git add . && git commit 'updated gh-pages'`
   end
 end
 

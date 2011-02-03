@@ -78,9 +78,10 @@ require 'active_record' unless defined?(ActiveRecord)
 
 module Markdownizer
 
-  # Here we define two helper methods. These will be called from the model to
-  # perform the corresponding conversions and parsings.
   class << self
+    # Here we define two helper methods. These will be called from the model to
+    # perform the corresponding conversions and parsings.
+   
     # `Markdownizer.markdown` method converts plain Markdown text to formatted html.
     def markdown(text)
       RDiscount.new(text).to_html
