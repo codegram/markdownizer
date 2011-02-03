@@ -33,13 +33,6 @@ task :pages do
       `cd docs && git branch gh-pages --track origin/gh-pages`
   end
 end
-# 
-# # Update the pages/ directory clone
-# file 'docs/.git' => ['docs/', '.git/refs/heads/gh-pages'] do |f|
-#   sh "cd docs && git init -q && git remote add o ../.git" if !File.exist?(f.name)
-#   sh "cd docs && git fetch -q o && git reset -q --hard o/gh-pages && touch ."
-# end
-# CLOBBER.include 'docs/.git'
 
 # TESTS =====================================================================
 
