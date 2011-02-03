@@ -26,33 +26,31 @@ CLEAN.include 'docs/index.html'
 task :doc => :docs
 
 # GITHUB PAGES ===============================================================
-#
-# desc 'Update gh-pages branch'
-# task :pages => ['docs/.git', :docs] do
-#   rev = `git rev-parse --short HEAD`.strip
-#   Dir.chdir 'docs' do
-#     sh "git add *.html"
-#     sh "git commit -m 'rebuild pages from #{rev}'" do |ok,res|
-#       if ok
-#         verbose { puts "gh-pages updated" }
-#         sh "git push -q o HEAD:gh-pages"
-#       end
-#     end
-#   end
-#   # Update the pages/ directory clone
-# end
-# file 'docs/.git' => ['docs/', '.git/refs/heads/gh-pages'] do |f|
-#   sh "cd docs && git init -q && git remote add o ../.git" if !File.exist?(f.name)
-#   sh "cd docs && git fetch -q o && git reset -q --hard o/gh-pages && touch ."
-# end
-# CLOBBER.include 'docs/.git'
 
-desc 'Update gh-pages branch'
-task :pages do
-  file '.git/refs/heads/gh-pages' => 'docs/' do |f|
-    `cd docs && git branch gh-pages --track origin/gh-pages`
-    `git checkout gh-pages && git add . && git commit 'updated gh-pages'`
-  end
+site = 'docs'
+source_branch = 'master'
+deploy_branch = 'gh-pages'
+
+desc "generate and deploy website to github user pages"
+multitask :deploy_github do
+  puts ">>> Deploying #{deploy_branch} branch to Github Pages <<<"
+  require 'git'
+  repo = Git.open('.')
+  puts "\n>>> Checking out #{deploy_branch} branch <<<\n"
+  repo.branch("#{deploy_branch}").checkout
+  (Dir["*"] - [site]).each { |f| rm_rf(f) }
+  Dir["#{site}/*"].each {|f| mv(f, ".")}
+  rm_rf(site)
+  puts "\n>>> Moving generated site files <<<\n"
+  Dir["**/*"].each {|f| repo.add(f) }
+  repo.status.deleted.each {|f, s| repo.remove(f)}
+  puts "\n>>> Commiting: Site updated at #{Time.now.utc} <<<\n"
+  message = ENV["MESSAGE"] || "Site updated at #{Time.now.utc}"
+  repo.commit(message)
+  puts "\n>>> Pushing generated site to #{deploy_branch} branch <<<\n"
+  repo.push
+  puts "\n>>> Github Pages deploy complete <<<\n"
+  repo.branch("#{source_branch}").checkout
 end
 
 # TESTS =====================================================================

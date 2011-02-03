@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    markdownizer (0.1.1)
+    markdownizer (0.1.2)
       activerecord (~> 3.0.3)
       coderay
       rdiscount
@@ -23,8 +23,10 @@ GEM
     builder (2.1.2)
     coderay (0.9.7)
     diff-lcs (1.1.2)
+    git (1.2.5)
     i18n (0.5.0)
     mustache (0.12.0)
+    pygments (0.0.1.a)
     rdiscount (1.6.8)
     rocco (0.5)
       mustache
@@ -45,7 +47,9 @@ PLATFORMS
 DEPENDENCIES
   activerecord (~> 3.0.3)
   coderay
+  git
   markdownizer!
+  pygments
   rdiscount
   rocco
   rspec (~> 2.4.0)
