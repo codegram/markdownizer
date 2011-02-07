@@ -91,17 +91,48 @@ module Markdownizer
     # ruby %}` until `{% endcode %}` and replaces it with appropriate classes for
     # code highlighting. It can take many languages aside from Ruby.
     #
-    # It also parses the special idiom {% caption 'my caption' %}, which both
-    # introduces an h5 before the code and passes the caption to the enclosing div
-    # as a parameter.
+    # It also parses a couple of special idioms:
+    #
+    #   * {% caption 'my caption' %} introduces an h5 before the code and passes
+    #     the caption to the enclosing div as well.
+    #
+    #   * {% highlight [1,2,3] %} highlights lines 1, 2 and 3. It accepts any
+    #     Enumerable, so you can also give a Range (1..3).
+    #
     def coderay(text, options = {})
-      text.gsub(%r[\{% caption '([\w\s]+)' %\}]) do
-        options.merge!({:caption => $1}) if $1
-        "#####" << $1
-      end.gsub(%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m) do
-        CodeRay.scan($2, $1).div({:css => :class}.merge(options))
+      text.gsub(%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m) do
+        code, language = $2, $1
+
+        code, options, caption = extract_caption_from(code, options)
+        code, options = extract_highlights_from(code, options)
+
+        (caption || '') << CodeRay.scan(code, language).div({:css => :class}.merge(options))
       end
     end
+
+    private
+
+    def extract_caption_from(code, options)
+      caption = nil
+      code.gsub!(%r[\{% caption '([\w\s]+)' %\}]) do
+        options.merge!({:caption => $1}) if $1
+        caption = "<h5>" << $1 << "</h5>"
+        ''
+      end
+      [code, options, caption]
+    end
+
+    # FIXME: Find a safer way to eval code, MY LORD
+    def extract_highlights_from(code, options)
+      code.gsub!(%r[\{% highlight (.+) %\}]) do
+        enumerable = eval($1)
+        enumerable = (Enumerable === enumerable)? enumerable : nil
+        options.merge!({:highlight_lines => enumerable}) if enumerable
+        ''
+      end
+      [code, options]
+    end
+
   end
 
   #### Public interface

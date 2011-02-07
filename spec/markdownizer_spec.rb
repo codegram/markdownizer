@@ -27,8 +27,32 @@ describe Markdownizer do
     let(:text_with_caption) { """
       #My markdown text
 
-      {% caption 'This will become an h5' %}
       {% code ruby %}
+      {% caption 'This will become an h5' %}
+        def function(*args)
+          puts 'result'
+        end
+      {% endcode %}
+
+    """
+    }
+    let(:text_with_array_highlights) { """
+      #My markdown text
+
+      {% code ruby %}
+      {% highlight [1,2,3] %}
+        def function(*args)
+          puts 'result'
+        end
+      {% endcode %}
+
+    """
+    }
+    let(:text_with_range_highlights) { """
+      #My markdown text
+
+      {% code ruby %}
+      {% highlight (1..3) %}
         def function(*args)
           puts 'result'
         end
@@ -51,14 +75,28 @@ describe Markdownizer do
       subject.coderay(text, :my => :option).should match('parsed code')
     end
     it 'accepts a caption option inside the code' do
-      subject.coderay(text_with_caption).should match('#####This will become an h5')
+      subject.coderay(text_with_caption).should match('<h5>This will become an h5</h5>')
     end
     it 'passes the caption to the div' do
       parsed = double :parsed
       CodeRay.should_receive(:scan).and_return parsed
-      parsed.should_receive(:div).with(:css => :class, :caption => 'This will become an h5')
+      parsed.should_receive(:div).with(:css => :class, :caption => 'This will become an h5').and_return 'result'
 
-      subject.coderay(text_with_caption).should match('#####This will become an h5')
+      subject.coderay(text_with_caption)
+    end
+    it 'accepts highlighted lines with an array' do
+      parsed = double :parsed
+      CodeRay.should_receive(:scan).and_return parsed
+      parsed.should_receive(:div).with(:css => :class, :highlight_lines => [1,2,3]).and_return 'result'
+
+      subject.coderay(text_with_array_highlights)
+    end
+    it 'accepts highlighted lines with a range' do
+      parsed = double :parsed
+      CodeRay.should_receive(:scan).and_return parsed
+      parsed.should_receive(:div).with(:css => :class, :highlight_lines => (1..3)).and_return 'result'
+
+      subject.coderay(text_with_range_highlights)
     end
   end
 

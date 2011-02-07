@@ -45,8 +45,9 @@ You save your posts with markdown text like this:
       Markdown is awesome!
       ## Some H2 title...
 
-      {% caption 'This caption will become an h5 and also a property of the enclosing div' %}
       {% code ruby %}
+      {% caption 'This caption will become an h5 and also a property of the enclosing div' %}
+      {% highlight [1,2,3] %}  <- this will highlight lines 1, 2 and 3 (it accepts a Range as well)
 
         # All this code will be highlighted properly! :)
         def my_method(*my_args)
