@@ -90,9 +90,9 @@ module Markdownizer
     # `Markdownizer.coderay` method parses a code block delimited from `{% code
     # ruby %}` until `{% endcode %}` and replaces it with appropriate classes for
     # code highlighting. It can take many languages aside from Ruby.
-    def coderay(text)
+    def coderay(text, options = {})
       text.gsub(%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m) do
-        CodeRay.scan($2, $1).div(:css => :class)
+        CodeRay.scan($2, $1).div({:css => :class}.merge(options))
       end
     end
   end
@@ -105,7 +105,12 @@ module Markdownizer
 
     # Calling `markdownize! :attribute` (where `:attribute` can be any database
     # attribute with type `text`) will treat this field as Markdown.
-    def markdownize! attribute
+    # You can pass an `options` hash for CodeRay. An example option would be:
+    #   
+    #   * `:line_numbers => :table` (or `:inline`)
+    #
+    # You can check other available options in CodeRay's documentation.
+    def markdownize! attribute, options = {}
       # Check that both `:attribute` and `:rendered_attribute` columns exist.
       # If they don't, it raises an error indicating that the user should generate
       # a migration.
@@ -121,7 +126,7 @@ module Markdownizer
       # Define the converter method, which will assign the rendered html to the
       # `:rendered_attribute` field.
       define_method :"render_#{attribute}" do
-        self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute))))
+        self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute), options)))
       end
     end
   end

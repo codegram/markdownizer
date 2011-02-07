@@ -33,9 +33,9 @@ describe Markdownizer do
         end
       """, 'ruby').and_return scanned_code
 
-      scanned_code.should_receive(:div).with(:css => :class).and_return 'parsed code'
+      scanned_code.should_receive(:div).with(:css => :class, :my => :option).and_return 'parsed code'
 
-      subject.coderay(text).should match('parsed code')
+      subject.coderay(text, :my => :option).should match('parsed code')
     end
   end
 
@@ -80,7 +80,7 @@ describe Markdownizer do
 
           instance = klass.new
           instance.should_receive(:send).with(:body).and_return raw_body
-          Markdownizer.should_receive(:coderay).with(raw_body).and_return raw_body_with_code
+          Markdownizer.should_receive(:coderay).with(raw_body, {}).and_return raw_body_with_code
           Markdownizer.should_receive(:markdown).with(raw_body_with_code).and_return final_code
 
           instance.should_receive(:send).with(:rendered_body=, final_code)
