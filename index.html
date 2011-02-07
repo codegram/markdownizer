@@ -176,10 +176,15 @@
         <div class="octowrap">
           <a class="octothorpe" href="#section-9">#</a>
         </div>
-        <p> <code>Markdownizer.markdown</code> method converts plain Markdown text to formatted html.</p>
+        <p> <code>Markdownizer.markdown</code> method converts plain Markdown text to formatted html.
+ To parse the markdown in a coherent hierarchical context, you must provide it
+ with the current hierarchical level of the text to be parsed.</p>
       </td>
       <td class=code>
-        <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">markdown</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">markdown</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">hierarchy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">text</span><span class="o">.</span><span class="n">gsub!</span> <span class="sr">%r[(#+)([\w\s]+)]</span> <span class="k">do</span>
+        <span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">*</span> <span class="n">hierarchy</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="vg">$1</span> <span class="o">&lt;&lt;</span> <span class="vg">$2</span>
+      <span class="k">end</span>
       <span class="no">RDiscount</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">to_html</span>
     <span class="k">end</span></pre></div>
       </td>
@@ -325,11 +330,15 @@
         <div class="octowrap">
           <a class="octothorpe" href="#section-16">#</a>
         </div>
-        <p> Create a <code>before_save</code> callback which will convert plain text to
- Markdownized html every time the model is saved.</p>
+        <p> The <code>:hierarchy</code> option tells Markdownizer the smallest header tag that
+ precedes the Markdown text. If you have a blogpost with an H1 (title) and
+ an H2 (some kind of tagline), then your hierarchy is 2, and the biggest
+ header found the markdown text will be translated directly to an H3. This
+ allows for semantical coherence within the context where the markdown text
+ is to be introduced.</p>
       </td>
       <td class=code>
-        <div class='highlight'><pre>      <span class="nb">self</span><span class="o">.</span><span class="n">before_save</span> <span class="ss">:&quot;render_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">&quot;</span></pre></div>
+        <div class='highlight'><pre>      <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="ss">:hierarchy</span><span class="p">)</span> <span class="o">||</span> <span class="mi">0</span></pre></div>
       </td>
     </tr>
     <tr id='section-17'>
@@ -337,17 +346,11 @@
         <div class="octowrap">
           <a class="octothorpe" href="#section-17">#</a>
         </div>
-        <p> Define the converter method, which will assign the rendered html to the
- <code>:rendered_attribute</code> field.</p>
+        <p> Create a <code>before_save</code> callback which will convert plain text to
+ Markdownized html every time the model is saved.</p>
       </td>
       <td class=code>
-        <div class='highlight'><pre>      <span class="n">define_method</span> <span class="ss">:&quot;render_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">&quot;</span> <span class="k">do</span>
-        <span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:&quot;rendered_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">=&quot;</span><span class="p">,</span> <span class="no">Markdownizer</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="no">Markdownizer</span><span class="o">.</span><span class="n">coderay</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">attribute</span><span class="p">),</span> <span class="n">options</span><span class="p">)))</span>
-      <span class="k">end</span>
-    <span class="k">end</span>
-  <span class="k">end</span>
-
-<span class="k">end</span></pre></div>
+        <div class='highlight'><pre>      <span class="nb">self</span><span class="o">.</span><span class="n">before_save</span> <span class="ss">:&quot;render_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">&quot;</span></pre></div>
       </td>
     </tr>
     <tr id='section-18'>
@@ -355,16 +358,34 @@
         <div class="octowrap">
           <a class="octothorpe" href="#section-18">#</a>
         </div>
-        <p> Finally, make our DSL available to any class inheriting from ActiveRecord::Base.</p>
+        <p> Define the converter method, which will assign the rendered html to the
+ <code>:rendered_attribute</code> field.</p>
       </td>
       <td class=code>
-        <div class='highlight'><pre><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:extend</span><span class="p">,</span> <span class="no">Markdownizer</span><span class="o">::</span><span class="no">DSL</span><span class="p">)</span></pre></div>
+        <div class='highlight'><pre>      <span class="n">define_method</span> <span class="ss">:&quot;render_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">&quot;</span> <span class="k">do</span>
+        <span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:&quot;rendered_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">=&quot;</span><span class="p">,</span> <span class="no">Markdownizer</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="no">Markdownizer</span><span class="o">.</span><span class="n">coderay</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">attribute</span><span class="p">),</span> <span class="n">options</span><span class="p">),</span> <span class="n">hierarchy</span><span class="p">))</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+<span class="k">end</span></pre></div>
       </td>
     </tr>
     <tr id='section-19'>
       <td class=docs>
         <div class="octowrap">
           <a class="octothorpe" href="#section-19">#</a>
+        </div>
+        <p> Finally, make our DSL available to any class inheriting from ActiveRecord::Base.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:extend</span><span class="p">,</span> <span class="no">Markdownizer</span><span class="o">::</span><span class="no">DSL</span><span class="p">)</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-20'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-20">#</a>
         </div>
         <p> And that&rsquo;s it!</p>
 
