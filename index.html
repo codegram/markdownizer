@@ -193,20 +193,38 @@
  ruby %}</code> until <code>{% endcode %}</code> and replaces it with appropriate classes for
  code highlighting. It can take many languages aside from Ruby.</p>
 
-<p> It also parses the special idiom {% caption &lsquo;my caption&rsquo; %}, which both
- introduces an h5 before the code and passes the caption to the enclosing div
- as a parameter.</p>
+<p> It also parses a couple of special idioms:</p>
+
+<ul>
+<li><p> {% caption &lsquo;my caption&rsquo; %} introduces an h5 before the code and passes
+ the caption to the enclosing div as well.</p></li>
+<li><p> {% highlight [1,2,3] %} highlights lines 1, 2 and 3. It accepts any
+ Enumerable, so you can also give a Range (1..3).</p></li>
+</ul>
       </td>
       <td class=code>
         <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">coderay</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
-      <span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">%r[\{% caption &#39;([\w\s]+)&#39; %\}]</span><span class="p">)</span> <span class="k">do</span>
-        <span class="n">options</span><span class="o">.</span><span class="n">merge!</span><span class="p">({</span><span class="ss">:caption</span> <span class="o">=&gt;</span> <span class="vg">$1</span><span class="p">})</span> <span class="k">if</span> <span class="vg">$1</span>
-        <span class="s2">&quot;#####&quot;</span> <span class="o">&lt;&lt;</span> <span class="vg">$1</span>
-      <span class="k">end</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m</span><span class="p">)</span> <span class="k">do</span>
-        <span class="no">CodeRay</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vg">$2</span><span class="p">,</span> <span class="vg">$1</span><span class="p">)</span><span class="o">.</span><span class="n">div</span><span class="p">({</span><span class="ss">:css</span> <span class="o">=&gt;</span> <span class="ss">:class</span><span class="p">}</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
+      <span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m</span><span class="p">)</span> <span class="k">do</span>
+        <span class="n">code</span><span class="p">,</span> <span class="n">language</span> <span class="o">=</span> <span class="vg">$2</span><span class="p">,</span> <span class="vg">$1</span>
+
+        <span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">caption</span> <span class="o">=</span> <span class="n">extract_caption_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="n">code</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">extract_highlights_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">caption</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="no">CodeRay</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span><span class="o">.</span><span class="n">div</span><span class="p">({</span><span class="ss">:css</span> <span class="o">=&gt;</span> <span class="ss">:class</span><span class="p">}</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
       <span class="k">end</span>
     <span class="k">end</span>
-  <span class="k">end</span></pre></div>
+
+    <span class="kp">private</span>
+
+    <span class="k">def</span> <span class="nf">extract_caption_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+      <span class="n">caption</span> <span class="o">=</span> <span class="kp">nil</span>
+      <span class="n">code</span><span class="o">.</span><span class="n">gsub!</span><span class="p">(</span><span class="sr">%r[\{% caption &#39;([\w\s]+)&#39; %\}]</span><span class="p">)</span> <span class="k">do</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">merge!</span><span class="p">({</span><span class="ss">:caption</span> <span class="o">=&gt;</span> <span class="vg">$1</span><span class="p">})</span> <span class="k">if</span> <span class="vg">$1</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="s2">&quot;&lt;h5&gt;&quot;</span> <span class="o">&lt;&lt;</span> <span class="vg">$1</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;&lt;/h5&gt;&quot;</span>
+        <span class="s1">&#39;&#39;</span>
+      <span class="k">end</span>
+      <span class="o">[</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">caption</span><span class="o">]</span>
+    <span class="k">end</span></pre></div>
       </td>
     </tr>
     <tr id='section-11'>
@@ -214,16 +232,37 @@
         <div class="octowrap">
           <a class="octothorpe" href="#section-11">#</a>
         </div>
-        <h3>Public interface</h3>
+        <p> FIXME: Find a safer way to eval code, MY LORD</p>
       </td>
       <td class=code>
-        <div class='highlight'><pre>  </pre></div>
+        <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">extract_highlights_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+      <span class="n">code</span><span class="o">.</span><span class="n">gsub!</span><span class="p">(</span><span class="sr">%r[\{% highlight (.+) %\}]</span><span class="p">)</span> <span class="k">do</span>
+        <span class="n">enumerable</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="vg">$1</span><span class="p">)</span>
+        <span class="n">enumerable</span> <span class="o">=</span> <span class="p">(</span><span class="no">Enumerable</span> <span class="o">===</span> <span class="n">enumerable</span><span class="p">)?</span> <span class="n">enumerable</span> <span class="p">:</span> <span class="kp">nil</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">merge!</span><span class="p">({</span><span class="ss">:highlight_lines</span> <span class="o">=&gt;</span> <span class="n">enumerable</span><span class="p">})</span> <span class="k">if</span> <span class="n">enumerable</span>
+        <span class="s1">&#39;&#39;</span>
+      <span class="k">end</span>
+      <span class="o">[</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="o">]</span>
+    <span class="k">end</span>
+
+  <span class="k">end</span></pre></div>
       </td>
     </tr>
     <tr id='section-12'>
       <td class=docs>
         <div class="octowrap">
           <a class="octothorpe" href="#section-12">#</a>
+        </div>
+        <h3>Public interface</h3>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  </pre></div>
+      </td>
+    </tr>
+    <tr id='section-13'>
+      <td class=docs>
+        <div class="octowrap">
+          <a class="octothorpe" href="#section-13">#</a>
         </div>
         <p> The Markdownizer DSL is the public interface of the gem, and can be called
  from any ActiveRecord model.</p>
@@ -232,10 +271,10 @@
         <div class='highlight'><pre>  <span class="k">module</span> <span class="nn">DSL</span></pre></div>
       </td>
     </tr>
-    <tr id='section-13'>
+    <tr id='section-14'>
       <td class=docs>
         <div class="octowrap">
-          <a class="octothorpe" href="#section-13">#</a>
+          <a class="octothorpe" href="#section-14">#</a>
         </div>
         <p> Calling <code>markdownize! :attribute</code> (where <code>:attribute</code> can be any database
  attribute with type <code>text</code>) will treat this field as Markdown.
@@ -252,10 +291,10 @@
         <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">markdownize!</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span></pre></div>
       </td>
     </tr>
-    <tr id='section-14'>
+    <tr id='section-15'>
       <td class=docs>
         <div class="octowrap">
-          <a class="octothorpe" href="#section-14">#</a>
+          <a class="octothorpe" href="#section-15">#</a>
         </div>
         <p> Check that both <code>:attribute</code> and <code>:rendered_attribute</code> columns exist.
  If they don&rsquo;t, it raises an error indicating that the user should generate
@@ -268,10 +307,10 @@
       <span class="k">end</span></pre></div>
       </td>
     </tr>
-    <tr id='section-15'>
+    <tr id='section-16'>
       <td class=docs>
         <div class="octowrap">
-          <a class="octothorpe" href="#section-15">#</a>
+          <a class="octothorpe" href="#section-16">#</a>
         </div>
         <p> Create a <code>before_save</code> callback which will convert plain text to
  Markdownized html every time the model is saved.</p>
@@ -280,10 +319,10 @@
         <div class='highlight'><pre>      <span class="nb">self</span><span class="o">.</span><span class="n">before_save</span> <span class="ss">:&quot;render_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">&quot;</span></pre></div>
       </td>
     </tr>
-    <tr id='section-16'>
+    <tr id='section-17'>
       <td class=docs>
         <div class="octowrap">
-          <a class="octothorpe" href="#section-16">#</a>
+          <a class="octothorpe" href="#section-17">#</a>
         </div>
         <p> Define the converter method, which will assign the rendered html to the
  <code>:rendered_attribute</code> field.</p>
@@ -298,10 +337,10 @@
 <span class="k">end</span></pre></div>
       </td>
     </tr>
-    <tr id='section-17'>
+    <tr id='section-18'>
       <td class=docs>
         <div class="octowrap">
-          <a class="octothorpe" href="#section-17">#</a>
+          <a class="octothorpe" href="#section-18">#</a>
         </div>
         <p> Finally, make our DSL available to any class inheriting from ActiveRecord::Base.</p>
       </td>
@@ -309,10 +348,10 @@
         <div class='highlight'><pre><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:extend</span><span class="p">,</span> <span class="no">Markdownizer</span><span class="o">::</span><span class="no">DSL</span><span class="p">)</span></pre></div>
       </td>
     </tr>
-    <tr id='section-18'>
+    <tr id='section-19'>
       <td class=docs>
         <div class="octowrap">
-          <a class="octothorpe" href="#section-18">#</a>
+          <a class="octothorpe" href="#section-19">#</a>
         </div>
         <p> And that&rsquo;s it!</p>
 
