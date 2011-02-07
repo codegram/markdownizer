@@ -83,7 +83,12 @@ module Markdownizer
     # perform the corresponding conversions and parsings.
    
     # `Markdownizer.markdown` method converts plain Markdown text to formatted html.
-    def markdown(text)
+    # To parse the markdown in a coherent hierarchical context, you must provide it
+    # with the current hierarchical level of the text to be parsed.
+    def markdown(text, hierarchy = 0)
+      text.gsub! %r[(#+)([\w\s]+)] do
+        ('#' * hierarchy) << $1 << $2
+      end
       RDiscount.new(text).to_html
     end
 
@@ -170,6 +175,14 @@ module Markdownizer
         raise "#{self.name} doesn't have required attributes :#{attribute} and :rendered_#{attribute}\nPlease generate a migration to add these attributes -- both should have type :text."
       end
 
+      # The `:hierarchy` option tells Markdownizer the smallest header tag that
+      # precedes the Markdown text. If you have a blogpost with an H1 (title) and
+      # an H2 (some kind of tagline), then your hierarchy is 2, and the biggest
+      # header found the markdown text will be translated directly to an H3. This
+      # allows for semantical coherence within the context where the markdown text
+      # is to be introduced.
+      hierarchy = options.delete(:hierarchy) || 0
+
       # Create a `before_save` callback which will convert plain text to
       # Markdownized html every time the model is saved.
       self.before_save :"render_#{attribute}"
@@ -177,7 +190,7 @@ module Markdownizer
       # Define the converter method, which will assign the rendered html to the
       # `:rendered_attribute` field.
       define_method :"render_#{attribute}" do
-        self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute), options)))
+        self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute), options), hierarchy))
       end
     end
   end
