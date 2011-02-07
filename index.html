@@ -192,11 +192,18 @@
         <p> <code>Markdownizer.coderay</code> method parses a code block delimited from <code>{% code
  ruby %}</code> until <code>{% endcode %}</code> and replaces it with appropriate classes for
  code highlighting. It can take many languages aside from Ruby.</p>
+
+<p> It also parses the special idiom {% caption &lsquo;my caption&rsquo; %}, which both
+ introduces an h5 before the code and passes the caption to the enclosing div
+ as a parameter.</p>
       </td>
       <td class=code>
-        <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">coderay</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-      <span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m</span><span class="p">)</span> <span class="k">do</span>
-        <span class="no">CodeRay</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vg">$2</span><span class="p">,</span> <span class="vg">$1</span><span class="p">)</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="ss">:css</span> <span class="o">=&gt;</span> <span class="ss">:class</span><span class="p">)</span>
+        <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">coderay</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
+      <span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">%r[\{% caption &#39;([\w\s]+)&#39; %\}]</span><span class="p">)</span> <span class="k">do</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">merge!</span><span class="p">({</span><span class="ss">:caption</span> <span class="o">=&gt;</span> <span class="vg">$1</span><span class="p">})</span> <span class="k">if</span> <span class="vg">$1</span>
+        <span class="s2">&quot;#####&quot;</span> <span class="o">&lt;&lt;</span> <span class="vg">$1</span>
+      <span class="k">end</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m</span><span class="p">)</span> <span class="k">do</span>
+        <span class="no">CodeRay</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vg">$2</span><span class="p">,</span> <span class="vg">$1</span><span class="p">)</span><span class="o">.</span><span class="n">div</span><span class="p">({</span><span class="ss">:css</span> <span class="o">=&gt;</span> <span class="ss">:class</span><span class="p">}</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
       <span class="k">end</span>
     <span class="k">end</span>
   <span class="k">end</span></pre></div>
@@ -231,10 +238,18 @@
           <a class="octothorpe" href="#section-13">#</a>
         </div>
         <p> Calling <code>markdownize! :attribute</code> (where <code>:attribute</code> can be any database
- attribute with type <code>text</code>) will treat this field as Markdown.</p>
+ attribute with type <code>text</code>) will treat this field as Markdown.
+ You can pass an <code>options</code> hash for CodeRay. An example option would be:</p>
+
+<ul>
+<li> <code>:line_numbers =&gt; :table</code> (or <code>:inline</code>)</li>
+</ul>
+
+
+<p> You can check other available options in CodeRay&rsquo;s documentation.</p>
       </td>
       <td class=code>
-        <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">markdownize!</span> <span class="n">attribute</span></pre></div>
+        <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">markdownize!</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span></pre></div>
       </td>
     </tr>
     <tr id='section-14'>
@@ -275,7 +290,7 @@
       </td>
       <td class=code>
         <div class='highlight'><pre>      <span class="n">define_method</span> <span class="ss">:&quot;render_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">&quot;</span> <span class="k">do</span>
-        <span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:&quot;rendered_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">=&quot;</span><span class="p">,</span> <span class="no">Markdownizer</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="no">Markdownizer</span><span class="o">.</span><span class="n">coderay</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">attribute</span><span class="p">))))</span>
+        <span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:&quot;rendered_</span><span class="si">#{</span><span class="n">attribute</span><span class="si">}</span><span class="ss">=&quot;</span><span class="p">,</span> <span class="no">Markdownizer</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="no">Markdownizer</span><span class="o">.</span><span class="n">coderay</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">attribute</span><span class="p">),</span> <span class="n">options</span><span class="p">)))</span>
       <span class="k">end</span>
     <span class="k">end</span>
   <span class="k">end</span>
