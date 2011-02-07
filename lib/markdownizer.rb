@@ -91,6 +91,9 @@ module Markdownizer
     # ruby %}` until `{% endcode %}` and replaces it with appropriate classes for
     # code highlighting. It can take many languages aside from Ruby.
     #
+    # With a hash of options you can specify `:line_numbers` (`:table` or `:inline`),
+    # and the class of the enclosing div with `:enclosing_class`.
+    #
     # It also parses a couple of special idioms:
     #
     #   * {% caption 'my caption' %} introduces an h5 before the code and passes
@@ -104,12 +107,19 @@ module Markdownizer
         options.delete(:highlight_lines)
         options.delete(:caption)
 
+        enclosing_class = options[:enclosing_class] || 'markdownizer_code'
+
         code, language = $2.strip, $1.strip
 
         code, options, caption = extract_caption_from(code, options)
         code, options = extract_highlights_from(code, options)
 
-        (caption || '') << CodeRay.scan(code, language).div({:css => :class}.merge(options))
+        html_caption = caption ? '<h5>' << caption << '</h5>' : nil
+
+        "<div class=\"#{enclosing_class}#{caption ? "\" caption=\"#{caption}" : ''}\">" << 
+          (html_caption || '') <<
+            CodeRay.scan(code, language).div({:css => :class}.merge(options)) <<
+              "</div>"
       end
     end
 
@@ -119,7 +129,7 @@ module Markdownizer
       caption = nil
       code.gsub!(%r[\{% caption '([\w\s]+)' %\}]) do
         options.merge!({:caption => $1.strip}) if $1
-        caption = "<h5>" << $1.strip << "</h5>"
+        caption = $1.strip
         ''
       end
       [code.strip, options, caption]

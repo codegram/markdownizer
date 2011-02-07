@@ -96,6 +96,9 @@ describe Markdownizer do
 
       subject.coderay(text_with_range_highlights)
     end
+    it 'encloses everything in a nice class' do
+      subject.coderay(text_with_caption).should match(/div class=\"markdownizer_code\" caption=\"This will become an h5\"/)
+    end
   end
 
   describe Markdownizer::DSL do
