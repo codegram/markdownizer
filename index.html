@@ -193,6 +193,9 @@
  ruby %}</code> until <code>{% endcode %}</code> and replaces it with appropriate classes for
  code highlighting. It can take many languages aside from Ruby.</p>
 
+<p> With a hash of options you can specify <code>:line_numbers</code> (<code>:table</code> or <code>:inline</code>),
+ and the class of the enclosing div with <code>:enclosing_class</code>.</p>
+
 <p> It also parses a couple of special idioms:</p>
 
 <ul>
@@ -205,12 +208,22 @@
       <td class=code>
         <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">coderay</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="p">{})</span>
       <span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m</span><span class="p">)</span> <span class="k">do</span>
-        <span class="n">code</span><span class="p">,</span> <span class="n">language</span> <span class="o">=</span> <span class="vg">$2</span><span class="p">,</span> <span class="vg">$1</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="ss">:highlight_lines</span><span class="p">)</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="ss">:caption</span><span class="p">)</span>
+
+        <span class="n">enclosing_class</span> <span class="o">=</span> <span class="n">options</span><span class="o">[</span><span class="ss">:enclosing_class</span><span class="o">]</span> <span class="o">||</span> <span class="s1">&#39;markdownizer_code&#39;</span>
+
+        <span class="n">code</span><span class="p">,</span> <span class="n">language</span> <span class="o">=</span> <span class="vg">$2</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="vg">$1</span><span class="o">.</span><span class="n">strip</span>
 
         <span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">caption</span> <span class="o">=</span> <span class="n">extract_caption_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
         <span class="n">code</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">extract_highlights_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
 
-        <span class="p">(</span><span class="n">caption</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="no">CodeRay</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span><span class="o">.</span><span class="n">div</span><span class="p">({</span><span class="ss">:css</span> <span class="o">=&gt;</span> <span class="ss">:class</span><span class="p">}</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">options</span><span class="p">))</span>
+        <span class="n">html_caption</span> <span class="o">=</span> <span class="n">caption</span> <span class="p">?</span> <span class="s1">&#39;&lt;h5&gt;&#39;</span> <span class="o">&lt;&lt;</span> <span class="n">caption</span> <span class="o">&lt;&lt;</span> <span class="s1">&#39;&lt;/h5&gt;&#39;</span> <span class="p">:</span> <span class="kp">nil</span>
+
+        <span class="s2">&quot;&lt;div class=</span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">enclosing_class</span><span class="si">}#{</span><span class="n">caption</span> <span class="p">?</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> caption=</span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">caption</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&gt;&quot;</span> <span class="o">&lt;&lt;</span> 
+          <span class="p">(</span><span class="n">html_caption</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">&lt;&lt;</span>
+            <span class="no">CodeRay</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span><span class="o">.</span><span class="n">div</span><span class="p">({</span><span class="ss">:css</span> <span class="o">=&gt;</span> <span class="ss">:class</span><span class="p">}</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">options</span><span class="p">))</span> <span class="o">&lt;&lt;</span>
+              <span class="s2">&quot;&lt;/div&gt;&quot;</span>
       <span class="k">end</span>
     <span class="k">end</span>
 
@@ -219,11 +232,11 @@
     <span class="k">def</span> <span class="nf">extract_caption_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
       <span class="n">caption</span> <span class="o">=</span> <span class="kp">nil</span>
       <span class="n">code</span><span class="o">.</span><span class="n">gsub!</span><span class="p">(</span><span class="sr">%r[\{% caption &#39;([\w\s]+)&#39; %\}]</span><span class="p">)</span> <span class="k">do</span>
-        <span class="n">options</span><span class="o">.</span><span class="n">merge!</span><span class="p">({</span><span class="ss">:caption</span> <span class="o">=&gt;</span> <span class="vg">$1</span><span class="p">})</span> <span class="k">if</span> <span class="vg">$1</span>
-        <span class="n">caption</span> <span class="o">=</span> <span class="s2">&quot;&lt;h5&gt;&quot;</span> <span class="o">&lt;&lt;</span> <span class="vg">$1</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;&lt;/h5&gt;&quot;</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">merge!</span><span class="p">({</span><span class="ss">:caption</span> <span class="o">=&gt;</span> <span class="vg">$1</span><span class="o">.</span><span class="n">strip</span><span class="p">})</span> <span class="k">if</span> <span class="vg">$1</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="vg">$1</span><span class="o">.</span><span class="n">strip</span>
         <span class="s1">&#39;&#39;</span>
       <span class="k">end</span>
-      <span class="o">[</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">caption</span><span class="o">]</span>
+      <span class="o">[</span><span class="n">code</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">caption</span><span class="o">]</span>
     <span class="k">end</span></pre></div>
       </td>
     </tr>
@@ -237,12 +250,12 @@
       <td class=code>
         <div class='highlight'><pre>    <span class="k">def</span> <span class="nf">extract_highlights_from</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
       <span class="n">code</span><span class="o">.</span><span class="n">gsub!</span><span class="p">(</span><span class="sr">%r[\{% highlight (.+) %\}]</span><span class="p">)</span> <span class="k">do</span>
-        <span class="n">enumerable</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="vg">$1</span><span class="p">)</span>
+        <span class="n">enumerable</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="vg">$1</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
         <span class="n">enumerable</span> <span class="o">=</span> <span class="p">(</span><span class="no">Enumerable</span> <span class="o">===</span> <span class="n">enumerable</span><span class="p">)?</span> <span class="n">enumerable</span> <span class="p">:</span> <span class="kp">nil</span>
         <span class="n">options</span><span class="o">.</span><span class="n">merge!</span><span class="p">({</span><span class="ss">:highlight_lines</span> <span class="o">=&gt;</span> <span class="n">enumerable</span><span class="p">})</span> <span class="k">if</span> <span class="n">enumerable</span>
         <span class="s1">&#39;&#39;</span>
       <span class="k">end</span>
-      <span class="o">[</span><span class="n">code</span><span class="p">,</span> <span class="n">options</span><span class="o">]</span>
+      <span class="o">[</span><span class="n">code</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">options</span><span class="o">]</span>
     <span class="k">end</span>
 
   <span class="k">end</span></pre></div>
