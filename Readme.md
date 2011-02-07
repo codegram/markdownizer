@@ -26,7 +26,12 @@ whatever.
 In your model, let's say, Post:
 
     class Post < ActiveRecord::Base
-      markdownize! :body # In this case we want to treat :body as markdown
+      markdownize! :body
+      # In this case we want to treat :body as markdown.
+      # You can pass an options hash to the code renderer, such as:
+      #
+      #   markdownize! :body, :line_numbers => :table
+      #
     end
 
 Markdownizer needs an additional field (`:rendered_body`), which you should
@@ -40,7 +45,8 @@ You save your posts with markdown text like this:
       Markdown is awesome!
       ## Some H2 title...
 
-      {% highlight ruby %}
+      {% caption 'This caption will become an h5 and also a property of the enclosing div' %}
+      {% code ruby %}
 
         # All this code will be highlighted properly! :)
         def my_method(*my_args)
@@ -49,7 +55,7 @@ You save your posts with markdown text like this:
           end
         end
 
-      {% endhighlight %}
+      {% endcode %}
     """
 
 And then, in your view you just have to call `@post.rendered_body` :)

@@ -90,8 +90,15 @@ module Markdownizer
     # `Markdownizer.coderay` method parses a code block delimited from `{% code
     # ruby %}` until `{% endcode %}` and replaces it with appropriate classes for
     # code highlighting. It can take many languages aside from Ruby.
+    #
+    # It also parses the special idiom {% caption 'my caption' %}, which both
+    # introduces an h5 before the code and passes the caption to the enclosing div
+    # as a parameter.
     def coderay(text, options = {})
-      text.gsub(%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m) do
+      text.gsub(%r[\{% caption '([\w\s]+)' %\}]) do
+        options.merge!({:caption => $1}) if $1
+        "#####" << $1
+      end.gsub(%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m) do
         CodeRay.scan($2, $1).div({:css => :class}.merge(options))
       end
     end

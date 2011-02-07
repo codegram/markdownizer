@@ -24,6 +24,19 @@ describe Markdownizer do
 
     """
     }
+    let(:text_with_caption) { """
+      #My markdown text
+
+      {% caption 'This will become an h5' %}
+      {% code ruby %}
+        def function(*args)
+          puts 'result'
+        end
+      {% endcode %}
+
+    """
+    }
+
     it 'calls CodeRay to parse the code inside {% highlight ruby %} blocks' do
       scanned_code, html_code = double(:scanned_code), double(:html_code)
 
@@ -36,6 +49,16 @@ describe Markdownizer do
       scanned_code.should_receive(:div).with(:css => :class, :my => :option).and_return 'parsed code'
 
       subject.coderay(text, :my => :option).should match('parsed code')
+    end
+    it 'accepts a caption option inside the code' do
+      subject.coderay(text_with_caption).should match('#####This will become an h5')
+    end
+    it 'passes the caption to the div' do
+      parsed = double :parsed
+      CodeRay.should_receive(:scan).and_return parsed
+      parsed.should_receive(:div).with(:css => :class, :caption => 'This will become an h5')
+
+      subject.coderay(text_with_caption).should match('#####This will become an h5')
     end
   end
 
