@@ -64,11 +64,9 @@ describe Markdownizer do
     it 'calls CodeRay to parse the code inside {% highlight ruby %} blocks' do
       scanned_code, html_code = double(:scanned_code), double(:html_code)
 
-      CodeRay.should_receive(:scan).with("""
-        def function(*args)
+      CodeRay.should_receive(:scan).with("""def function(*args)
           puts 'result'
-        end
-      """, 'ruby').and_return scanned_code
+        end""", 'ruby').and_return scanned_code
 
       scanned_code.should_receive(:div).with(:css => :class, :my => :option).and_return 'parsed code'
 

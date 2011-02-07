@@ -101,7 +101,10 @@ module Markdownizer
     #
     def coderay(text, options = {})
       text.gsub(%r[\{% code (\w+?) %\}(.+?)\{% endcode %\}]m) do
-        code, language = $2, $1
+        options.delete(:highlight_lines)
+        options.delete(:caption)
+
+        code, language = $2.strip, $1.strip
 
         code, options, caption = extract_caption_from(code, options)
         code, options = extract_highlights_from(code, options)
@@ -115,22 +118,22 @@ module Markdownizer
     def extract_caption_from(code, options)
       caption = nil
       code.gsub!(%r[\{% caption '([\w\s]+)' %\}]) do
-        options.merge!({:caption => $1}) if $1
-        caption = "<h5>" << $1 << "</h5>"
+        options.merge!({:caption => $1.strip}) if $1
+        caption = "<h5>" << $1.strip << "</h5>"
         ''
       end
-      [code, options, caption]
+      [code.strip, options, caption]
     end
 
     # FIXME: Find a safer way to eval code, MY LORD
     def extract_highlights_from(code, options)
       code.gsub!(%r[\{% highlight (.+) %\}]) do
-        enumerable = eval($1)
+        enumerable = eval($1.strip)
         enumerable = (Enumerable === enumerable)? enumerable : nil
         options.merge!({:highlight_lines => enumerable}) if enumerable
         ''
       end
-      [code, options]
+      [code.strip, options]
     end
 
   end
