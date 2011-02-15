@@ -20,7 +20,7 @@ describe Markdownizer do
         ##This is an H2
         ###This is an H3
         """
-        result = double :result, to_html: true
+        result = double :result, :to_html => true
         RDiscount.should_receive(:new).with do |t|
           t.should =~ /###This is an H1/
           t.should =~ /####This is an H2/
@@ -37,7 +37,7 @@ describe Markdownizer do
         {% endcode %}
         ###This is an H3
         """
-        result = double :result, to_html: true
+        result = double :result, :to_html => true
         RDiscount.should_receive(:new).with do |t|
           t.should =~ /###This is an H1/
           t.should =~ /#method/
