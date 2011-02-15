@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rocco'
   s.add_development_dependency 'git'
   s.add_development_dependency 'pygments'
-  s.add_development_dependency 'rspec', '~> 2.4.0'
+  s.add_development_dependency 'rspec', '~> 2.5.0'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

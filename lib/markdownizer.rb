@@ -86,8 +86,8 @@ module Markdownizer
     # To parse the markdown in a coherent hierarchical context, you must provide it
     # with the current hierarchical level of the text to be parsed.
     def markdown(text, hierarchy = 0)
-      text.gsub! %r[(#+)([\w\s]+)] do
-        ('#' * hierarchy) << $1 << $2
+      text.gsub! %r[^(\s*)(#+)([\w\s]+)$] do
+        $1 << ('#' * hierarchy) << $2 << $3
       end
       RDiscount.new(text).to_html
     end
@@ -132,7 +132,7 @@ module Markdownizer
 
     def extract_caption_from(code, options)
       caption = nil
-      code.gsub!(%r[\{% caption '([\w\s]+)' %\}]) do
+      code.gsub!(%r[\{% caption '([^']+)' %\}]) do
         options.merge!({:caption => $1.strip}) if $1
         caption = $1.strip
         ''

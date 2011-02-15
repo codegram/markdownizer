@@ -28,6 +28,26 @@ describe Markdownizer do
         end.and_return result
         subject.markdown(my_text, 2)
       end
+      it 'still does not convert anything that is not a header' do
+        my_text = """
+        #This is an H1
+        I am talking about my #method
+        {% code ruby %}
+          \\#My comment
+        {% endcode %}
+        ###This is an H3
+        """
+        result = double :result, to_html: true
+        RDiscount.should_receive(:new).with do |t|
+          t.should =~ /###This is an H1/
+          t.should =~ /#method/
+          t.should_not =~ /###method/
+          t.should =~ /#My comment/
+          t.should_not =~ /###My comment/
+          t.should =~ /#####This is an H3/
+        end.and_return result
+        subject.markdown(my_text, 2)
+      end
     end
   end
   describe ".coderay(text)" do
@@ -47,6 +67,18 @@ describe Markdownizer do
 
       {% code ruby %}
       {% caption 'This will become an h5' %}
+        def function(*args)
+          puts 'result'
+        end
+      {% endcode %}
+
+    """
+    }
+    let(:text_with_weird_caption) { """
+      #My markdown text
+
+      {% code ruby %}
+      {% caption 'This will become an h5, with some/strange.characters\yo' %}
         def function(*args)
           puts 'result'
         end
@@ -92,6 +124,9 @@ describe Markdownizer do
     end
     it 'accepts a caption option inside the code' do
       subject.coderay(text_with_caption).should match('<h5>This will become an h5</h5>')
+    end
+    it 'accepts a caption with weird chars inside the code' do
+      subject.coderay(text_with_weird_caption).should match('<h5>This will become an h5, with some/strange.characters\yo</h5>')
     end
     it 'passes the caption to the div' do
       parsed = double :parsed

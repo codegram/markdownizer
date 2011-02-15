@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    markdownizer (0.3.1)
+    markdownizer (0.3.2)
       activerecord (>= 3.0.3)
       coderay
       rdiscount
@@ -9,17 +9,17 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    activemodel (3.0.3)
-      activesupport (= 3.0.3)
+    activemodel (3.0.4)
+      activesupport (= 3.0.4)
       builder (~> 2.1.2)
       i18n (~> 0.4)
-    activerecord (3.0.3)
-      activemodel (= 3.0.3)
-      activesupport (= 3.0.3)
+    activerecord (3.0.4)
+      activemodel (= 3.0.4)
+      activesupport (= 3.0.4)
       arel (~> 2.0.2)
       tzinfo (~> 0.3.23)
-    activesupport (3.0.3)
-    arel (2.0.7)
+    activesupport (3.0.4)
+    arel (2.0.8)
     builder (2.1.2)
     coderay (0.9.7)
     diff-lcs (1.1.2)
@@ -31,14 +31,14 @@ GEM
     rocco (0.5)
       mustache
       rdiscount
-    rspec (2.4.0)
-      rspec-core (~> 2.4.0)
-      rspec-expectations (~> 2.4.0)
-      rspec-mocks (~> 2.4.0)
-    rspec-core (2.4.0)
-    rspec-expectations (2.4.0)
+    rspec (2.5.0)
+      rspec-core (~> 2.5.0)
+      rspec-expectations (~> 2.5.0)
+      rspec-mocks (~> 2.5.0)
+    rspec-core (2.5.1)
+    rspec-expectations (2.5.0)
       diff-lcs (~> 1.1.2)
-    rspec-mocks (2.4.0)
+    rspec-mocks (2.5.0)
     tzinfo (0.3.24)
 
 PLATFORMS
@@ -52,4 +52,4 @@ DEPENDENCIES
   pygments
   rdiscount
   rocco
-  rspec (~> 2.4.0)
+  rspec (~> 2.5.0)
