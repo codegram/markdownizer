@@ -89,6 +89,7 @@ module Markdownizer
       text.gsub! %r[^(\s*)(#+)([\w\s]+)$] do
         $1 << ('#' * hierarchy) << $2 << $3
       end
+      text.gsub!('\#','#')
       RDiscount.new(text).to_html
     end
 
@@ -115,6 +116,11 @@ module Markdownizer
         enclosing_class = options[:enclosing_class] || 'markdownizer_code'
 
         code, language = $2.strip, $1.strip
+
+        # Mark comments to avoid conflicts with Header parsing
+        code.gsub!(/(#+)/) do
+          '\\' + $1
+        end
 
         code, options, caption = extract_caption_from(code, options)
         code, options = extract_highlights_from(code, options)
