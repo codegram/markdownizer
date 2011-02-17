@@ -89,7 +89,7 @@ module Markdownizer
       text.gsub! %r[^(\s*)(#+)([\w\s]+)$] do
         $1 << ('#' * hierarchy) << $2 << $3
       end
-      text.gsub!('\#','#')
+      text.gsub!("\\#",'#')
       RDiscount.new(text).to_html
     end
 

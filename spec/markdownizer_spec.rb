@@ -44,6 +44,7 @@ describe Markdownizer do
           t.should_not =~ /###method/
           t.should =~ /#My comment/
           t.should_not =~ /###My comment/
+          t.should_not =~ /\\#My comment/
           t.should =~ /#####This is an H3/
         end.and_return result
         subject.markdown(my_text, 2)
