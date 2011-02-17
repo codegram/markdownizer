@@ -86,7 +86,7 @@ module Markdownizer
     # To parse the markdown in a coherent hierarchical context, you must provide it
     # with the current hierarchical level of the text to be parsed.
     def markdown(text, hierarchy = 0)
-      text.gsub! %r[^(\s*)(#+)([\w\s]+)$] do
+      text.gsub! %r[^(\s*)(#+)(.+)$] do
         $1 << ('#' * hierarchy) << $2 << $3
       end
       text.gsub!("\\#",'#')
