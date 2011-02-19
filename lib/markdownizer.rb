@@ -196,7 +196,11 @@ module Markdownizer
       # Define the converter method, which will assign the rendered html to the
       # `:rendered_attribute` field.
       define_method :"render_#{attribute}" do
-        self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute), options), hierarchy))
+        unless self.send(attribute).nil?
+          self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute), options), hierarchy))
+        else
+          self.send(:"rendered_#{attribute}=", nil)
+        end
       end
     end
   end
