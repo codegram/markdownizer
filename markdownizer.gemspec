@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'activerecord', '>= 3.0.3'
   s.add_runtime_dependency 'rdiscount'
   s.add_runtime_dependency 'coderay'
+  s.add_runtime_dependency 'sanitize'
 
   s.add_development_dependency 'rocco'
   s.add_development_dependency 'git'

@@ -74,6 +74,7 @@
 # [cr]: http://github.com/rubychan/coderay
 require 'rdiscount'
 require 'coderay'
+require 'sanitize'
 require 'active_record' unless defined?(ActiveRecord)
 
 module Markdownizer
@@ -193,10 +194,11 @@ module Markdownizer
       # Markdownized html every time the model is saved.
       self.before_save :"render_#{attribute}"
 
-      # Define the converter method, which will assign the rendered html to the
-      # `:rendered_attribute` field.
+      # Define the converter method, which will first remove any html from the
+      # attribute and then assign the rendered html to the `:rendered_attribute`
+      # field.
       define_method :"render_#{attribute}" do
-        self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute), options), hierarchy))
+        self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(Sanitize.clean(self.send(attribute)), options), hierarchy))
       end
     end
   end
