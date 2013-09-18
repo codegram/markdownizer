@@ -8,7 +8,7 @@ module Markdownizer
       source_root File.expand_path(File.join(File.dirname(__FILE__), 'templates'))
 
       def copy_stylesheet_file
-        copy_file 'coderay.css', 'public/stylesheets/markdownizer.css'
+        copy_file 'coderay.css', 'app/assets/stylesheets/markdownizer.css'
       end
     end
   end
