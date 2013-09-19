@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    markdownizer (0.3.6)
+    markdownizer (0.3.7)
       activerecord (>= 3.0.3)
       coderay
       rdiscount
@@ -34,7 +34,7 @@ GEM
     minitest (4.7.5)
     multi_json (1.8.0)
     rake (10.1.0)
-    rdiscount (1.6.8)
+    rdiscount (2.0.7.1)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)

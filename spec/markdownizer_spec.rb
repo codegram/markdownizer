@@ -142,15 +142,6 @@ describe Markdownizer do
     it 'accepts a caption with weird chars inside the code' do
       subject.coderay(text_with_weird_caption).should match('<h5>This will become an h5, with some/strange.characters\yo</h5>')
     end
-    it 'marks ruby comments to avoid conflicts with Markdown headers' do
-      code = ''
-      code.stub(:div).and_return ''
-      CodeRay.should_receive(:scan).with do |string|
-        string.should match(/\\#My comment/)
-        string.should match(/\\# My other comment/)
-      end.and_return code
-      subject.coderay(text_with_comments)
-    end
     it 'passes the caption to the div' do
       parsed = double :parsed
       CodeRay.should_receive(:scan).and_return parsed

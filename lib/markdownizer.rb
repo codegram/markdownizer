@@ -117,11 +117,6 @@ module Markdownizer
 
         code, language = $2.strip, $1.strip
 
-        # Mark comments to avoid conflicts with Header parsing
-        code.gsub!(/(#+)/) do
-          '\\' + $1
-        end
-
         code, options, caption = extract_caption_from(code, options)
         code, options = extract_highlights_from(code, options)
 
@@ -196,8 +191,9 @@ module Markdownizer
       # Define the converter method, which will assign the rendered html to the
       # `:rendered_attribute` field.
       define_method :"render_#{attribute}" do
-        unless self.send(attribute).nil?
-          self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(self.send(attribute), options), hierarchy))
+        value = self.send(attribute)
+        unless value.nil?
+          self.send(:"rendered_#{attribute}=", Markdownizer.markdown(Markdownizer.coderay(value, options), hierarchy))
         else
           self.send(:"rendered_#{attribute}=", nil)
         end
