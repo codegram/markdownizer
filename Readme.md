@@ -74,4 +74,4 @@ And then, in your view you just have to call `@post.rendered_body` :)
 
 ## Copyright
 
-Copyright (c) 2011 Codegram. See LICENSE for details.
+Copyright (c) 2011-2013 Codegram. See LICENSE for details.
