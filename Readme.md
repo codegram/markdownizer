@@ -17,7 +17,7 @@ gem 'markdownizer'
 
 If you want code highlighting, you should run this generator too:
 
-```ruby
+```
 rails generate markdownizer:install
 ```
 
