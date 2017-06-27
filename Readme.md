@@ -69,7 +69,7 @@ Post.create body: """
 
 And then, in your view you just have to call `@post.rendered_body` :)
 
-##Contribute!
+## Contribute!
 
 * Fork the project.
 * Make your feature addition or bug fix.
