@@ -1,4 +1,4 @@
-#Markdownizer
+# Markdownizer
 
 A simple gem for Rails 3 to render some ActiveRecord text field as Markdown!
 
@@ -7,7 +7,7 @@ It mixes CodeRay and RDiscount to give you awesome code highlighting :)
 You can check the generated Rocco documentation on the [project
 page](http://codegram.github.com/markdownizer).
 
-##Install
+## Install
 
 In your Gemfile:
 
@@ -69,7 +69,7 @@ Post.create body: """
 
 And then, in your view you just have to call `@post.rendered_body` :)
 
-##Contribute!
+## Contribute!
 
 * Fork the project.
 * Make your feature addition or bug fix.
